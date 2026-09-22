@@ -1,0 +1,10 @@
+streamlit
+python-dotenv
+requests
+beautifulsoup4
+sentence-transformers
+faiss-cpu
+numpy
+google-genai>=2.24.0,<3
+groq
+mistralai>=2.10.1,<3

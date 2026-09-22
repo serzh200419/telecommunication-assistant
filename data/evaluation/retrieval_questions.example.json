@@ -1,0 +1,16 @@
+[
+  {
+    "id": "example_answerable_replace_before_evaluation",
+    "language": "hy",
+    "type": "answerable",
+    "question": "EXAMPLE ONLY: Replace with an authored Armenian question and verified article references.",
+    "expected_articles": ["REPLACE_WITH_ARTICLE_NUMBER"]
+  },
+  {
+    "id": "example_unanswerable_replace_before_evaluation",
+    "language": "en",
+    "type": "unanswerable",
+    "question": "EXAMPLE ONLY: Replace with an authored English question outside the source law's scope.",
+    "expected_articles": []
+  }
+]
