@@ -36,7 +36,7 @@ class RetrievalEvaluationTests(unittest.TestCase):
             "recall_at_1": 0.0, "recall_at_3": 1.0, "recall_at_5": 1.0, "reciprocal_rank": 0.5,
         })
         self.assertEqual(report["summary"]["first_relevant_below_rank_1"], ["test_1"])
-        retrieve.assert_called_once_with("Synthetic test question", top_k=5)
+        retrieve.assert_called_once_with("Synthetic test question", top_k=3)
 
     @patch("src.evaluation.retrieval_eval.retrieve")
     def test_synthesis_recall_and_coverage(self, retrieve):

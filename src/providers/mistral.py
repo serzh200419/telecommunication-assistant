@@ -69,26 +69,42 @@ class MistralProvider:
         ]
         output_format = response_format(allowed)
         start = None
+        parts = []
+        finish_reason = None
         try:
             with Mistral(api_key=self.api_key, retry_config=None) as client:
                 start = perf_counter()
-                response = client.chat.complete(
+                with client.chat.stream(
                     model=self.model, messages=messages, response_format=output_format, temperature=0,
-                )
-                result.total_latency_ms = (perf_counter() - start) * 1000
+                ) as stream:
+                    for event in stream:
+                        chunk = event.data
+                        for choice in chunk.choices:
+                            content = choice.delta.content
+                            if isinstance(content, list):
+                                content = "".join(
+                                    part.text for part in content if part.type == "text"
+                                )
+                            if isinstance(content, str) and content:
+                                if result.ttft_ms is None:
+                                    result.ttft_ms = (perf_counter() - start) * 1000
+                                parts.append(content)
+                            if choice.finish_reason is not None:
+                                finish_reason = choice.finish_reason
+                        if chunk.usage is not None:
+                            result.prompt_tokens = chunk.usage.prompt_tokens
+                            result.completion_tokens = chunk.usage.completion_tokens
+                    result.total_latency_ms = (perf_counter() - start) * 1000
         except Exception as error:
             if start is not None and result.total_latency_ms is None:
                 result.total_latency_ms = (perf_counter() - start) * 1000
             result.error = format_api_error(error)
             return result
-        if response.usage is not None:
-            result.prompt_tokens = response.usage.prompt_tokens
-            result.completion_tokens = response.usage.completion_tokens
-        if not response.choices or response.choices[0].finish_reason != "stop":
+        if finish_reason != "stop":
             result.error = "Mistral did not complete the response."
             return result
         try:
-            answer = json.loads(response.choices[0].message.content or "")
+            answer = json.loads("".join(parts))
             if isinstance(answer, dict):
                 if isinstance(answer.get("answer"), str):
                     result.raw_answer = answer["answer"]

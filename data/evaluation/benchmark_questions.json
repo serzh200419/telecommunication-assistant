@@ -1,0 +1,146 @@
+[
+  {
+    "id": "hy_001",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Սույն օրենքի համաձայն ո՞վ է համարվում օպերատոր:",
+    "expected_articles": ["2"],
+    "expected_answer": "Օպերատոր է ցանկացած անձ, որը Կարգավորողի կողմից լիազորված է տիրապետել և շահագործել հանրային էլեկտրոնային հաղորդակցության ցանցը՝ էլեկտրոնային հաղորդակցության ծառայություններ մատուցելու նպատակով։ Իր ցանցով ծառայություններ մատուցելիս օպերատորը նաև համարվում է ծառայություններ մատուցող։"
+  },
+  {
+    "id": "hy_002",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ո՞ր դեպքերում ծառայություններ մատուցողը կարող է սահմանափակել կամ կասեցնել բաժանորդին մատուցվող հանրային էլեկտրոնային հաղորդակցության ծառայությունը:",
+    "expected_articles": ["45"],
+    "expected_answer": "Մատուցողը կարող է սահմանափակել կամ կասեցնել ծառայությունը, եթե բաժանորդը ժամանակին չի վճարել, միացրել է չսերտիֆիկացված կամ անհամատեղելի, ցանցի աշխատանքին կամ ուրիշների օգտվելուն խանգարող սարքավորում, խախտել է սակագնի կամ պայմանագրի պայմանները, դիմելիս ներկայացրել է հնարավոր վնասակար ոչ ճիշտ տվյալներ, ավարտվել է համաձայնեցված ծառայության ժամկետը, կամ սահմանափակումն անհրաժեշտ է սարքավորումների կամ գծերի տեղադրման, վերանորոգման, փոխարինման կամ պահպանման համար։ Առնվազն հինգ աշխատանքային օր առաջ ցանցով, իսկ դրա անհնարինության դեպքում՝ գրավոր, պետք է ծանուցել պատճառների և տևողության մասին։ Ծանուցում չի պահանջվում սարքավորումների նշված երկու դեպքերում անհապաղ սահմանափակման անհրաժեշտության ժամանակ։ Սահմանափակումն արգելվում է, եթե հիմքը նախապես վերացվել է, կամ բաժանորդը վճարման ժամկետից առաջ գրավոր վիճարկում է վճարը և վճարում չվիճարկվող մասը։ Տեխնիկապես հնարավոր լինելու դեպքում պահպանվում են արտակարգ ծառայություններ զանգահարելու հնարավորությունները։ Բաժանորդը կարող է նաև առնվազն տասը օր առաջ ծանուցմամբ և պայմանագրային պարտավորությունների կատարմամբ կասեցնել ծառայությունը մեկ ամսից մեկ տարի, եթե Կարգավորողն այլ բան չի սահմանել։ Կասեցում է նախատեսվում նաև, երբ բաժանորդի պահանջած միացման տեղի կամ համարի փոփոխությունը տեխնիկապես հնարավոր չէ կատարել պահանջվող ժամկետում։"
+  },
+  {
+    "id": "hy_003",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ի՞նչ իրավունքներ ունեն վերջնական օգտագործողները սույն օրենքի համաձայն:",
+    "expected_articles": ["55"],
+    "expected_answer": "Վերջնական օգտագործողներն իրավունք ունեն հավասար հիմունքներով օգտվելու հանրային էլեկտրոնային հաղորդակցության ծառայություններից, ստանալու ծառայությունների վճարների մանրամասն հաշիվ-ապրանքագրեր, հրաժարվելու սակագնով կամ պայմանագրով չնշված ծառայությունների դիմաց վճարելուց և օգտվելու էլեկտրոնային հաղորդակցության գաղտնիությունից։ Նրանք ունեն նաև Հայաստանի Հանրապետության օրենքներով և սույն օրենքով նախատեսված այլ իրավունքներ։"
+  },
+  {
+    "id": "hy_004",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ո՞ր դեպքերում օպերատորը կամ ծառայություններ մատուցողը կարող է բացահայտել հաճախորդի ծառայությունների վերաբերյալ գաղտնի տեղեկությունները:",
+    "expected_articles": ["49"],
+    "expected_answer": "Տեղեկությունները կարող են բացահայտվել օրենքով նախատեսված դեպքերում և կարգով՝ քրեական հանցագործության կամ ազգային անվտանգության սպառնալիքի հետախուզման, հետաքննման կամ քրեական հետապնդման առնչությամբ, հաճախորդի գրավոր համաձայնությամբ, կամ երբ բացահայտումն անհրաժեշտ է օպերատորի կամ մատուցողի պաշտպանության համար՝ նրա դեմ ընթացող վարույթում։ Վերջին դեպքում հաճախորդը կարող է պահանջել գաղտնի բացահայտում՝ դռնփակ վարույթով։"
+  },
+  {
+    "id": "hy_005",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ի՞նչ պայմաններում է անձը համարվում էլեկտրոնային հաղորդակցության շուկայում գերիշխող դիրք ունեցող:",
+    "expected_articles": ["22"],
+    "expected_answer": "Անձը տվյալ էլեկտրոնային հաղորդակցության շուկայում ունի գերիշխող դիրք, եթե որպես մատակարար կամ սպառող չունի մրցակից, չի հանդիպում էական մրցակցության, կամ իր շրջանառության ծավալը կազմում է ընդհանուր շուկայի առնվազն մեկ երրորդը։ Սրանք այլընտրանքային պայմաններ են։"
+  },
+  {
+    "id": "hy_006",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ո՞ւմ կարող է բողոք ներկայացնել այն անձը, որը դժգոհ է օպերատորի կամ ծառայություններ մատուցողի՝ օրենքին հակասող գործողությունից:",
+    "expected_articles": ["59"],
+    "expected_answer": "Անձը կարող է բողոք ներկայացնել Կարգավորողին, եթե դժգոհ է օպերատորի կամ ծառայություններ մատուցողի՝ սույն օրենքով կարգավորվող և դրա դրույթներին հակասող գործողությունից, այդ թվում՝ 45-րդ հոդվածի համաձայն ծառայություն մատուցելու մերժումից։"
+  },
+  {
+    "id": "en_001",
+    "language": "en",
+    "type": "answerable",
+    "question": "Can a person own and operate a public electronic communications network in Armenia without a network license?",
+    "expected_articles": ["15"],
+    "expected_answer": "No. Owning and operating a public electronic communications network in Armenia requires a network license granted under the applicable complex licensing procedure. A network operation license issued before this law took effect remains sufficient until it expires; its holder need not obtain a new license before then."
+  },
+  {
+    "id": "en_002",
+    "language": "en",
+    "type": "answerable",
+    "question": "When is a radio frequency use authorization required to operate an electronic communications network or provide a service?",
+    "expected_articles": ["17"],
+    "expected_answer": "If operating the network or providing the service requires radio frequencies, the person must obtain the required radio frequency use authorization before doing so. Article 17 also requires the Regulator to establish rules allowing unlicensed operation of low-power radio-emitting devices whose types are approved by the Regulator or appropriate foreign standards bodies under the prescribed rules."
+  },
+  {
+    "id": "en_003",
+    "language": "en",
+    "type": "answerable",
+    "question": "Is an operator required to interconnect its public electronic communications network with another operator's network when requested?",
+    "expected_articles": ["33"],
+    "expected_answer": "Yes, when the other network is also a public electronic communications network. Every operator must provide interconnection on request, enabling customers across networks to communicate or receive services through any-to-any and end-to-end interconnection. The interconnecting operators share equal responsibility for establishing it within a reasonable time."
+  },
+  {
+    "id": "en_004",
+    "language": "en",
+    "type": "answerable",
+    "question": "Under what circumstances may the Regulator refuse to assign a number or code to an operator or service provider?",
+    "expected_articles": ["42"],
+    "expected_answer": "The Regulator assigns the number or code unless the requested number range, identification code, or short code is already assigned to another person; is reserved for another purpose under international agreements; the planned use conflicts with Armenia's numbering plan; or the applicant fails to justify the need for operating electronic communications networks or providing electronic communications services."
+  },
+  {
+    "id": "en_005",
+    "language": "en",
+    "type": "answerable",
+    "question": "What does the law require operators to provide through legally connected terminal equipment for access to emergency services?",
+    "expected_articles": ["44"],
+    "expected_answer": "Public network operators must design their networks so that the public can use short codes through all legally connected terminal equipment to contact the police, ambulance, fire, and rescue services, where establishing that connection is technically possible given the operating principles of the network and terminal equipment."
+  },
+  {
+    "id": "en_006",
+    "language": "en",
+    "type": "answerable",
+    "question": "What range of fines may the Regulator impose on a licensed legal entity for violating a provision of this law?",
+    "expected_articles": ["63"],
+    "expected_answer": "After notice and hearings, the Regulator may impose a penalty or fine of 2,000 to 4,000 times the minimum wage on a licensed legal entity for violating the law. If the violation was knowing or intentional, or occurred more than once within one year, it may impose an additional penalty or fine of 4,000 times the minimum wage."
+  },
+  {
+    "id": "syn_001",
+    "language": "en",
+    "type": "synthesis",
+    "question": "What protections does the law provide for both customer information and the confidentiality of electronic communications, including when information may be disclosed or communications intercepted?",
+    "expected_articles": ["49", "50"],
+    "expected_answer": "Article 49 requires operators and providers to keep information about the type, location, purpose, destination, quantity, and technical conditions of customers' services confidential. Disclosure is allowed in legally prescribed cases and procedures connected with investigating or prosecuting crime or national-security threats, with the customer's written consent, or when necessary for defense in proceedings against the operator or provider. In the last case, the customer may request confidential disclosure in closed proceedings. Disclosure compliant with these exceptions creates no liability for resulting damage. Under Article 50, a non-party may intercept, record, or disclose a communication only with the parties' written consent or a court decision in legally prescribed cases and procedures. Operators, providers, and their employees or representatives may also intercept or redirect communications or signals without disclosure when required for their work duties. Operators and providers must give law-enforcement and national-security personnel access to communications equipment and infrastructure, including equipment needed for interception, in the cases and manner prescribed by law."
+  },
+  {
+    "id": "syn_002",
+    "language": "hy",
+    "type": "synthesis",
+    "question": "Ի՞նչ պարտականություններ ունեն օպերատորներն ու ծառայություններ մատուցողները, և ի՞նչ իրավունքներ ու պարտականություններ ունեն վերջնական օգտագործողները:",
+    "expected_articles": ["54", "55"],
+    "expected_answer": "54-րդ հոդվածով օպերատորներն ու մատուցողները պարտավոր են կատարել օրենքները, Կարգավորողի կանոնները, լիցենզիայի ու թույլտվության պայմանները, հաշվի առնել պատմականորեն գերիշխողների լիցենզիոն բացառիկության իրավունքները, ապահովել հաճախորդների տեղեկությունների ու հաղորդագրությունների գաղտնիությունը՝ օրենքի բացառություններով, բնակչության համար հասանելի դարձնել համակցված ու վարձակալված ծառայությունները և օրենքով նախատեսված ձևով ընդլայնել ծառայություններն ու աշխարհագրական ընդգրկումը։ Նրանք պետք է հետևեն տեխնիկական ստանդարտներին, աջակցեն կառավարությանը միջազգային հեռահաղորդակցության և ստանդարտացման կազմակերպությունների հետ աշխատանքում, ապահովեն հնարավոր ամենաարագ հաղորդակցությունն արտակարգ իրավիճակներում ու կյանքի կամ ազգային անվտանգության սպառնալիքների դեպքում, պահպանեն սակագներն ու սպասարկման պայմանները, ժամանակին ներկայացնեն ճշգրիտ ու մանրամասն հաշիվներ և հնարավորինս անընդհատ, կանոնավոր ու լայնատարած ծառայություններ մատուցեն։ Սակագնով կամ պայմանագրով նախատեսված դեպքերում խափանված ծառայության ժամանակահատվածի հաշվարկված գումարը հաշվում առանձնացվում է որպես կանխավճար, իսկ անսարքությունները վերացվում են հնարավորինս արագ։ Պետք է լրատվամիջոցներով ժամանակին ու ճշգրիտ ծանուցել խոշոր վթարների և անջատումների հավանական ժամանակացույցի մասին, օգտագործողներին տեղեկացնել նոր սակագների մասին և Կարգավորողին տրամադրել պահանջվող տեղեկությունները։ 55-րդ հոդվածով վերջնական օգտագործողներն ունեն ծառայություններից հավասար օգտվելու, մանրամասն հաշիվներ ստանալու, սակագնով կամ պայմանագրով չնշված ծառայությունների դիմաց վճարելուց հրաժարվելու, հաղորդակցության գաղտնիության և օրենքներով նախատեսված այլ իրավունքներ։ Նրանք պարտավոր են պահպանել օրենսդրությունը, սակագներն ու պայմանագրերը, կատարել օրինական վճարումները՝ ներառյալ տեղական, միջքաղաքային ու միջազգային ծառայությունների պայմանագրային վճարները, և չօգտագործել չսերտիֆիկացված սարքավորումներ։"
+  },
+  {
+    "id": "syn_003",
+    "language": "en",
+    "type": "synthesis",
+    "question": "If a subscriber's service is interrupted or suspended, what rules govern suspension and what obligations apply to repairing a service fault?",
+    "expected_articles": ["45", "47"],
+    "expected_answer": "Article 45 permits restriction or suspension for late payment; uncertified, incompatible, or interfering equipment; necessary installation, repair, replacement, or maintenance; tariff or contract breaches; potentially harmful false application details; or expiry of the agreed service term. Notice stating reasons and duration must be given at least five working days in advance through the network, or in writing if that is impossible, except when immediate action is necessary for the specified equipment issues. Suspension is barred if its grounds are remedied beforehand, or charges are disputed in writing before the payment deadline and the undisputed portion is paid. Emergency calls must remain possible where technically feasible. For an interruption caused by the operator or provider, service must be restored within two days after the cause is removed; dominant operators' tariffs must prohibit charging for the disconnection or suspension period. Subscribers may request suspension for one month to one year unless the Regulator sets otherwise, giving at least ten days' notice and meeting applicable tariff or contract obligations. Suspension also applies if a requested connection relocation or number change cannot technically be completed by the required date. During suspension, service and associated payment obligations are suspended, equipment or the user line is disconnected, and provider-owned equipment and the number may be reassigned. Service resumes on the subscriber's application once the grounds disappear. Users may terminate without advance notice, subject to contractual or tariff termination and penalty provisions. Under Article 47, users report faults to the operator's repair department; operators and providers must receive reports and restore service within a reasonable time. They must submit aggregate electronic fault reports to the Regulator, fully open to public inspection. They may require access to network equipment, the demarcation point, and connected wiring or terminals to locate faults. Users bear repair costs if they caused the fault."
+  },
+  {
+    "id": "adv_001",
+    "language": "hy",
+    "type": "unanswerable",
+    "question": "Ի՞նչ եկամտային հարկի դրույքաչափ է կիրառվում հեռահաղորդակցության ընկերության աշխատակիցների աշխատավարձի նկատմամբ:",
+    "expected_articles": [],
+    "expected_answer": null
+  },
+  {
+    "id": "adv_002",
+    "language": "en",
+    "type": "unanswerable",
+    "question": "What corporate income tax rate applies to electronic communications companies in Armenia?",
+    "expected_articles": [],
+    "expected_answer": null
+  },
+  {
+    "id": "adv_003",
+    "language": "en",
+    "type": "unanswerable",
+    "question": "What minimum mobile internet download speed must every operator guarantee to subscribers?",
+    "expected_articles": [],
+    "expected_answer": null
+  }
+]

@@ -103,20 +103,43 @@ class GeminiProvider:
             "allowed_citations": list(dict.fromkeys(allowed_articles)),
         }, ensure_ascii=False)
         start = None
+        parts = []
+        completed = False
         try:
             # Interactions counts attempts as retries in this SDK; explicitly exclude 429.
             with genai.Client(api_key=self.api_key, http_options={
                 "retry_options": {"attempts": 1, "http_status_codes": [500, 502, 503, 504]},
             }) as client:
                 start = perf_counter()
-                response = client.interactions.create(
+                stream = client.interactions.create(
                     model=self.model,
                     system_instruction=system_instruction,
                     input=request_input,
                     response_format={"type": "text", "mime_type": "application/json", "schema": schema},
                     generation_config={"thinking_level": "low"},
                     store=False,
+                    stream=True,
                 )
+                for event in stream:
+                    if event.event_type == "step.delta" and event.delta.type == "text":
+                        content = event.delta.text
+                        if isinstance(content, str) and content:
+                            if result.ttft_ms is None:
+                                result.ttft_ms = (perf_counter() - start) * 1000
+                            parts.append(content)
+                    elif event.event_type == "interaction.completed":
+                        completed = event.interaction.status == "completed"
+                        usage = event.interaction.usage
+                        if usage is not None:
+                            result.prompt_tokens = usage.total_input_tokens
+                            result.completion_tokens = usage.total_output_tokens
+                    elif event.event_type == "error":
+                        code = (getattr(event.error, "code", None) or "").lower()
+                        if code in ("resource_exhausted", "rate_limit_exceeded", "quota_exceeded", "429"):
+                            result.error = "Gemini request failed (stream rate limit)."
+                        else:
+                            result.error = "Gemini request failed (stream error)."
+                        break
                 result.total_latency_ms = (perf_counter() - start) * 1000
         except Exception as error:
             if start is not None and result.total_latency_ms is None:
@@ -124,14 +147,13 @@ class GeminiProvider:
             result.error = format_api_error(error)
             return result
 
-        if response.usage is not None:
-            result.prompt_tokens = response.usage.total_input_tokens
-            result.completion_tokens = response.usage.total_output_tokens
-        if response.status != "completed":
+        if result.error is not None:
+            return result
+        if not completed:
             result.error = "Gemini did not complete the response."
             return result
         try:
-            answer = json.loads(response.output_text or "")
+            answer = json.loads("".join(parts))
             validate_answer(answer)
         except (ValueError, TypeError):
             result.error = "Gemini returned malformed structured output; expected answer and citations."

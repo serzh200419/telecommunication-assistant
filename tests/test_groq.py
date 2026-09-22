@@ -7,7 +7,7 @@ import httpx
 from groq import RateLimitError
 
 from src.providers.base import ProviderResponse
-from src.providers.groq import GroqProvider, response_format
+from src.providers.groq import GroqProvider
 from src.rag import SYSTEM_INSTRUCTION, ask, assemble_context
 
 
@@ -27,8 +27,17 @@ class GroqTests(unittest.TestCase):
             choices=[SimpleNamespace(finish_reason="stop", message=SimpleNamespace(content='{"answer":"Answer", "citations":["45"]}'))],
             usage=SimpleNamespace(prompt_tokens=100, completion_tokens=20),
         )
-        self.create.return_value = self.response
+        self.create.return_value.__enter__.return_value.__iter__.side_effect = self.stream_chunks
         self.provider = GroqProvider()
+
+    def stream_chunks(self):
+        for choice in self.response.choices:
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content=choice.message.content),
+                                         finish_reason=choice.finish_reason)],
+                usage=None, x_groq=None,
+            )
+        yield SimpleNamespace(choices=[], usage=None, x_groq=SimpleNamespace(usage=self.response.usage))
 
     def generate(self):
         return self.provider.generate("Question", "Context", SYSTEM_INSTRUCTION, ["45"])
@@ -39,7 +48,7 @@ class GroqTests(unittest.TestCase):
             with self.subTest(question=question):
                 context = "[Article 45]\nTitle: Վերնագիր\nText:\n Բնագիր։\n"
                 self.response.choices[0].message.content = json.dumps({"answer": answer, "citations": ["45"]})
-                with patch("src.providers.groq.perf_counter", side_effect=[1.0, 1.125]):
+                with patch("src.providers.groq.perf_counter", side_effect=[1.0, 1.025, 1.125]):
                     result = self.provider.generate(question, context, SYSTEM_INSTRUCTION, ["45", "45"])
                 self.assertIsNone(result.error)
                 self.assertEqual(result.answer, answer)
@@ -47,6 +56,7 @@ class GroqTests(unittest.TestCase):
                 self.assertEqual(result.citations, ["45"])
                 self.assertEqual((result.prompt_tokens, result.completion_tokens), (100, 20))
                 self.assertEqual(result.total_latency_ms, 125)
+                self.assertAlmostEqual(result.ttft_ms, 25)
                 arguments = self.create.call_args.kwargs
                 self.assertEqual(arguments["messages"][0], {"role": "system", "content": SYSTEM_INSTRUCTION})
                 self.assertEqual(json.loads(arguments["messages"][1]["content"]), {
@@ -56,15 +66,11 @@ class GroqTests(unittest.TestCase):
                 self.assertEqual(arguments["model"], "test-model")
                 self.client.assert_called_with(api_key="secret-test-key", max_retries=0)
 
-    def test_strict_output_for_supported_model(self):
+    def test_streaming_uses_json_mode_for_schema_capable_model(self):
         self.provider.model = "openai/gpt-oss-20b"
         self.generate()
-        schema = self.create.call_args.kwargs["response_format"]["json_schema"]
-        self.assertTrue(schema["strict"])
-        self.assertEqual(schema["schema"]["properties"]["citations"]["items"]["enum"], ["45"])
-        self.assertFalse(schema["schema"]["additionalProperties"])
-        empty = response_format(self.provider.model, [])["json_schema"]["schema"]
-        self.assertEqual(empty["properties"]["citations"]["maxItems"], 0)
+        self.assertEqual(self.create.call_args.kwargs["response_format"], {"type": "json_object"})
+        self.assertTrue(self.create.call_args.kwargs["stream"])
 
     def test_invalid_citation_preserves_raw_response(self):
         self.response.choices[0].message.content = '{"answer":"Original", "citations":["45", "99"]}'
@@ -125,7 +131,7 @@ class ProviderSelectionTests(unittest.TestCase):
                 result = ask("Question", provider=name)
                 self.assertEqual(result["provider"], name)
                 factory.return_value.generate.assert_called_once_with("Question", assemble_context(results), SYSTEM_INSTRUCTION, ["2"])
-                retrieve.assert_called_with("Question", top_k=5)
+                retrieve.assert_called_with("Question", top_k=3)
 
     @patch("src.rag.retrieve")
     def test_unknown_provider_is_rejected_before_retrieval(self, retrieve):

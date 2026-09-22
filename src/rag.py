@@ -47,7 +47,7 @@ def ask(question: str, provider=None) -> dict:
         provider = MistralProvider()
     elif isinstance(provider, str):
         raise ValueError("Unknown provider. Choose gemini, groq, or mistral.")
-    results = sorted(retrieve(question, top_k=5), key=lambda result: result["rank"])
+    results = sorted(retrieve(question, top_k=3), key=lambda result: result["rank"])
     allowed = list(dict.fromkeys(result["article_number"] for result in results))
     response = provider.generate(question, assemble_context(results), SYSTEM_INSTRUCTION, allowed)
     if response.error is None:

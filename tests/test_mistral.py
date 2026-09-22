@@ -23,13 +23,21 @@ class MistralTests(unittest.TestCase):
         client = patch("src.providers.mistral.Mistral")
         self.client = client.start()
         self.addCleanup(client.stop)
-        self.create = self.client.return_value.__enter__.return_value.chat.complete
+        self.create = self.client.return_value.__enter__.return_value.chat.stream
         self.response = SimpleNamespace(
             choices=[SimpleNamespace(finish_reason="stop", message=SimpleNamespace(content='{"answer":"Answer", "citations":["45"]}'))],
             usage=SimpleNamespace(prompt_tokens=100, completion_tokens=20),
         )
-        self.create.return_value = self.response
+        self.create.return_value.__enter__.return_value.__iter__.side_effect = self.stream_chunks
         self.provider = MistralProvider()
+
+    def stream_chunks(self):
+        for choice in self.response.choices:
+            yield SimpleNamespace(data=SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content=choice.message.content),
+                                         finish_reason=choice.finish_reason)], usage=None,
+            ))
+        yield SimpleNamespace(data=SimpleNamespace(choices=[], usage=self.response.usage))
 
     def generate(self):
         return self.provider.generate("Question", "Context", SYSTEM_INSTRUCTION, ["45"])
@@ -40,7 +48,7 @@ class MistralTests(unittest.TestCase):
             with self.subTest(question=question):
                 context = "[Article 45]\nTitle: ÕŽÕ¥Ö€Õ¶Õ¡Õ£Õ«Ö€\nText:\n Ô²Õ¶Õ¡Õ£Õ«Ö€Ö‰\n"
                 self.response.choices[0].message.content = json.dumps({"answer": answer, "citations": ["45"]})
-                with patch("src.providers.mistral.perf_counter", side_effect=[1.0, 1.125]):
+                with patch("src.providers.mistral.perf_counter", side_effect=[1.0, 1.025, 1.125]):
                     result = self.provider.generate(question, context, SYSTEM_INSTRUCTION, ["45", "45"])
                 self.assertIsNone(result.error)
                 self.assertEqual(result.answer, answer)
@@ -48,6 +56,7 @@ class MistralTests(unittest.TestCase):
                 self.assertEqual(result.citations, ["45"])
                 self.assertEqual((result.prompt_tokens, result.completion_tokens), (100, 20))
                 self.assertEqual(result.total_latency_ms, 125)
+                self.assertAlmostEqual(result.ttft_ms, 25)
                 arguments = self.create.call_args.kwargs
                 self.assertEqual(arguments["messages"][0], {"role": "system", "content": SYSTEM_INSTRUCTION})
                 self.assertEqual(json.loads(arguments["messages"][1]["content"]), {
@@ -82,6 +91,17 @@ class MistralTests(unittest.TestCase):
         result = self.generate()
         self.assertIsNone(result.error)
         self.assertEqual(result.citations, [])
+
+    def test_text_content_blocks_ignore_thinking(self):
+        self.response.choices[0].message.content = [
+            SimpleNamespace(type="thinking", thinking="Not answer text"),
+            SimpleNamespace(type="text", text='{"answer":"Answer",'),
+            SimpleNamespace(type="text", text='"citations":["45"]}'),
+        ]
+        result = self.generate()
+        self.assertIsNone(result.error)
+        self.assertEqual(result.answer, "Answer")
+        self.assertIsNotNone(result.ttft_ms)
 
     def test_malformed_output(self):
         for content in [None, "not JSON", "[]", '{"answer":"Answer"}', '{"answer":"Answer","citations":[45]}',
@@ -149,7 +169,7 @@ class ProviderSelectionTests(unittest.TestCase):
                 result = ask("Question", provider=name)
                 self.assertEqual(result["provider"], name)
                 factory.return_value.generate.assert_called_once_with("Question", assemble_context(results), SYSTEM_INSTRUCTION, ["2"])
-                retrieve.assert_called_with("Question", top_k=5)
+                retrieve.assert_called_with("Question", top_k=3)
 
     @patch("src.rag.retrieve")
     def test_unknown_provider_is_rejected_before_retrieval(self, retrieve):

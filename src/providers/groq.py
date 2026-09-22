@@ -11,31 +11,6 @@ from groq import Groq
 from src.providers.base import ProviderResponse, validate_answer
 
 
-# Capability list, not a default model: https://console.groq.com/docs/structured-outputs
-STRICT_OUTPUT_MODELS = {"openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"}
-
-
-def response_format(model: str, allowed: list[str]) -> dict:
-    if model not in STRICT_OUTPUT_MODELS:
-        return {"type": "json_object"}
-    citations = {"type": "array", "items": {"type": "string"}}
-    if allowed:
-        citations["items"]["enum"] = list(dict.fromkeys(allowed))
-    else:
-        citations["maxItems"] = 0
-    return {
-        "type": "json_schema",
-        "json_schema": {
-            "name": "legal_answer", "strict": True,
-            "schema": {
-                "type": "object",
-                "properties": {"answer": {"type": "string"}, "citations": citations},
-                "required": ["answer", "citations"], "additionalProperties": False,
-            },
-        },
-    }
-
-
 def format_api_error(error: Exception) -> str:
     fields = [type(error).__name__]
     status = getattr(error, "status_code", None)
@@ -73,28 +48,43 @@ class GroqProvider:
                 "question": question, "legal_context": context, "allowed_citations": allowed,
             }, ensure_ascii=False)},
         ]
-        output_format = response_format(self.model, allowed)
         start = None
+        parts = []
+        finish_reason = None
         try:
             with Groq(api_key=self.api_key, max_retries=0) as client:
                 start = perf_counter()
-                response = client.chat.completions.create(
-                    model=self.model, messages=messages, response_format=output_format,
-                )
-                result.total_latency_ms = (perf_counter() - start) * 1000
+                # Groq does not support json_schema with streaming.
+                with client.chat.completions.create(
+                    model=self.model, messages=messages, response_format={"type": "json_object"},
+                    stream=True,
+                ) as stream:
+                    for chunk in stream:
+                        for choice in chunk.choices:
+                            content = choice.delta.content
+                            if isinstance(content, str) and content:
+                                if result.ttft_ms is None:
+                                    result.ttft_ms = (perf_counter() - start) * 1000
+                                parts.append(content)
+                            if choice.finish_reason is not None:
+                                finish_reason = choice.finish_reason
+                        usage = chunk.usage
+                        if usage is None and chunk.x_groq is not None:
+                            usage = chunk.x_groq.usage
+                        if usage is not None:
+                            result.prompt_tokens = usage.prompt_tokens
+                            result.completion_tokens = usage.completion_tokens
+                    result.total_latency_ms = (perf_counter() - start) * 1000
         except Exception as error:
             if start is not None and result.total_latency_ms is None:
                 result.total_latency_ms = (perf_counter() - start) * 1000
             result.error = format_api_error(error)
             return result
-        if response.usage is not None:
-            result.prompt_tokens = response.usage.prompt_tokens
-            result.completion_tokens = response.usage.completion_tokens
-        if not response.choices or response.choices[0].finish_reason != "stop":
+        if finish_reason != "stop":
             result.error = "Groq did not complete the response."
             return result
         try:
-            answer = json.loads(response.choices[0].message.content or "")
+            answer = json.loads("".join(parts))
             if isinstance(answer, dict):
                 if isinstance(answer.get("answer"), str):
                     result.raw_answer = answer["answer"]

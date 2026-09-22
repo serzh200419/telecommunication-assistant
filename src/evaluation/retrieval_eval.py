@@ -41,7 +41,7 @@ def validate_questions(questions: list[dict]) -> None:
 
 
 def evaluate_question(question: dict) -> dict:
-    retrieved = retrieve(question["question"], top_k=5)
+    retrieved = retrieve(question["question"], top_k=3)
     articles = list(dict.fromkeys(result["article_number"] for result in retrieved))
     result = {
         **question,

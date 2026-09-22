@@ -1,0 +1,161 @@
+[
+  {
+    "id": "hy_001",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Սույն օրենքի համաձայն ո՞վ է համարվում օպերատոր:",
+    "expected_articles": [
+      "2"
+    ]
+  },
+  {
+    "id": "hy_002",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ո՞ր դեպքերում ծառայություններ մատուցողը կարող է սահմանափակել կամ կասեցնել բաժանորդին մատուցվող հանրային էլեկտրոնային հաղորդակցության ծառայությունը:",
+    "expected_articles": [
+      "45"
+    ]
+  },
+  {
+    "id": "hy_003",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ի՞նչ իրավունքներ ունեն վերջնական օգտագործողները սույն օրենքի համաձայն:",
+    "expected_articles": [
+      "55"
+    ]
+  },
+  {
+    "id": "hy_004",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ո՞ր դեպքերում օպերատորը կամ ծառայություններ մատուցողը կարող է բացահայտել հաճախորդի ծառայությունների վերաբերյալ գաղտնի տեղեկությունները:",
+    "expected_articles": [
+      "49"
+    ]
+  },
+  {
+    "id": "hy_005",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ի՞նչ պայմաններում է անձը համարվում էլեկտրոնային հաղորդակցության շուկայում գերիշխող դիրք ունեցող:",
+    "expected_articles": [
+      "22"
+    ]
+  },
+  {
+    "id": "hy_006",
+    "language": "hy",
+    "type": "answerable",
+    "question": "Ո՞ւմ կարող է բողոք ներկայացնել այն անձը, որը դժգոհ է օպերատորի կամ ծառայություններ մատուցողի՝ օրենքին հակասող գործողությունից:",
+    "expected_articles": [
+      "59"
+    ]
+  },
+  {
+    "id": "en_001",
+    "language": "en",
+    "type": "answerable",
+    "question": "Can a person own and operate a public electronic communications network in Armenia without a network license?",
+    "expected_articles": [
+      "15"
+    ]
+  },
+  {
+    "id": "en_002",
+    "language": "en",
+    "type": "answerable",
+    "question": "When is a radio frequency use authorization required to operate an electronic communications network or provide a service?",
+    "expected_articles": [
+      "17"
+    ]
+  },
+  {
+    "id": "en_003",
+    "language": "en",
+    "type": "answerable",
+    "question": "Is an operator required to interconnect its public electronic communications network with another operator's network when requested?",
+    "expected_articles": [
+      "33"
+    ]
+  },
+  {
+    "id": "en_004",
+    "language": "en",
+    "type": "answerable",
+    "question": "Under what circumstances may the Regulator refuse to assign a number or code to an operator or service provider?",
+    "expected_articles": [
+      "42"
+    ]
+  },
+  {
+    "id": "en_005",
+    "language": "en",
+    "type": "answerable",
+    "question": "What does the law require operators to provide through legally connected terminal equipment for access to emergency services?",
+    "expected_articles": [
+      "44"
+    ]
+  },
+  {
+    "id": "en_006",
+    "language": "en",
+    "type": "answerable",
+    "question": "What range of fines may the Regulator impose on a licensed legal entity for violating a provision of this law?",
+    "expected_articles": [
+      "63"
+    ]
+  },
+  {
+    "id": "syn_001",
+    "language": "en",
+    "type": "synthesis",
+    "question": "What protections does the law provide for both customer information and the confidentiality of electronic communications, including when information may be disclosed or communications intercepted?",
+    "expected_articles": [
+      "49",
+      "50"
+    ]
+  },
+  {
+    "id": "syn_002",
+    "language": "hy",
+    "type": "synthesis",
+    "question": "Ի՞նչ պարտականություններ ունեն օպերատորներն ու ծառայություններ մատուցողները, և ի՞նչ իրավունքներ ու պարտականություններ ունեն վերջնական օգտագործողները:",
+    "expected_articles": [
+      "54",
+      "55"
+    ]
+  },
+  {
+    "id": "syn_003",
+    "language": "en",
+    "type": "synthesis",
+    "question": "If a subscriber's service is interrupted or suspended, what rules govern suspension and what obligations apply to repairing a service fault?",
+    "expected_articles": [
+      "45",
+      "47"
+    ]
+  },
+  {
+    "id": "adv_001",
+    "language": "hy",
+    "type": "unanswerable",
+    "question": "Ի՞նչ եկամտային հարկի դրույքաչափ է կիրառվում հեռահաղորդակցության ընկերության աշխատակիցների աշխատավարձի նկատմամբ:",
+    "expected_articles": []
+  },
+  {
+    "id": "adv_002",
+    "language": "en",
+    "type": "unanswerable",
+    "question": "What corporate income tax rate applies to electronic communications companies in Armenia?",
+    "expected_articles": []
+  },
+  {
+    "id": "adv_003",
+    "language": "en",
+    "type": "unanswerable",
+    "question": "What minimum mobile internet download speed must every operator guarantee to subscribers?",
+    "expected_articles": []
+  }
+]

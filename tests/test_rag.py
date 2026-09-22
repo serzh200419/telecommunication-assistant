@@ -30,14 +30,16 @@ class RagTests(unittest.TestCase):
     @patch("src.rag.retrieve")
     def test_question_passthrough_and_valid_citations(self, retrieve):
         retrieve.return_value = self.results
+        self.provider.generate.return_value.ttft_ms = 25.0
         for question in [" Ո՞ր դեպքերում կարող է ծառայությունը կասեցվել: ", " What rights do end users have? "]:
             with self.subTest(question=question):
                 result = ask(question, self.provider)
-                retrieve.assert_called_with(question, top_k=5)
+                retrieve.assert_called_with(question, top_k=3)
                 self.provider.generate.assert_called_with(question, assemble_context(self.results), SYSTEM_INSTRUCTION, ["45"])
                 self.assertEqual(result["answer"], "Supported answer")
                 self.assertEqual(result["question"], question)
                 self.assertEqual(result["citations"], ["45"])
+                self.assertEqual(result["ttft_ms"], 25.0)
                 self.assertIsNone(result["error"])
                 self.assertEqual([item["rank"] for item in result["retrieved_results"]], [1, 2])
 
@@ -108,16 +110,23 @@ class GeminiTests(unittest.TestCase):
             output_text=json.dumps({"answer": "Answer", "citations": ["45"]}),
             status="completed", usage=SimpleNamespace(total_input_tokens=100, total_output_tokens=20),
         )
-        self.create.return_value = self.response
+        self.create.return_value.__iter__.side_effect = self.stream_events
         self.provider = GeminiProvider()
 
+    def stream_events(self):
+        yield SimpleNamespace(event_type="step.delta", delta=SimpleNamespace(
+            type="text", text=self.response.output_text,
+        ))
+        yield SimpleNamespace(event_type="interaction.completed", interaction=self.response)
+
     def test_structured_request_usage_and_latency(self):
-        with patch("src.providers.gemini.perf_counter", side_effect=[10.0, 10.125]):
+        with patch("src.providers.gemini.perf_counter", side_effect=[10.0, 10.025, 10.125]):
             result = self.provider.generate("Հայերեն հարց", "Context", SYSTEM_INSTRUCTION, ["45", "45", "2"])
         self.assertEqual(result.answer, "Answer")
         self.assertEqual(result.citations, ["45"])
         self.assertEqual((result.prompt_tokens, result.completion_tokens), (100, 20))
         self.assertEqual(result.total_latency_ms, 125)
+        self.assertAlmostEqual(result.ttft_ms, 25)
         request = self.create.call_args.kwargs
         self.assertEqual(json.loads(request["input"]), {
             "question": "Հայերեն հարց", "legal_context": "Context", "allowed_citations": ["45", "2"],
@@ -129,6 +138,7 @@ class GeminiTests(unittest.TestCase):
         self.assertEqual(request["response_format"]["schema"]["required"], ["answer", "citations"])
         self.assertEqual(request["system_instruction"], SYSTEM_INSTRUCTION)
         self.assertFalse(request["store"])
+        self.assertTrue(request["stream"])
 
     def test_malformed_outputs(self):
         for output in [None, "not json", "[]", '{"answer":"Answer"}',
@@ -166,6 +176,20 @@ class GeminiTests(unittest.TestCase):
         result = self.provider.generate("Question", "Context", SYSTEM_INSTRUCTION, ["45"])
         self.assertIn("GEMINI_API_KEY", result.error)
         self.client_factory.assert_not_called()
+
+    def test_stream_error_event_preserves_rate_limit_classification(self):
+        for code in ("RESOURCE_EXHAUSTED", "rate_limit_exceeded", "quota_exceeded", "429"):
+            with self.subTest(code=code):
+                self.create.return_value.__iter__.side_effect = lambda: iter([
+                    SimpleNamespace(event_type="error", error=SimpleNamespace(
+                        code=code, message="test-key private details",
+                    )),
+                ])
+                result = self.provider.generate("Question", "Context", SYSTEM_INSTRUCTION, ["45"])
+                self.assertIn("rate limit", result.error)
+                self.assertNotIn("test-key", result.error)
+                self.assertIsNone(result.ttft_ms)
+                self.assertIsNotNone(result.total_latency_ms)
 
     def test_empty_citations_remain_valid(self):
         self.response.output_text = json.dumps({"answer": "Insufficient information", "citations": []})

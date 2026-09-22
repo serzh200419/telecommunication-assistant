@@ -225,3 +225,6 @@ data/processed/*
 data/evaluation/*
 !data/evaluation/.gitkeep
 !data/evaluation/retrieval_questions.example.json
+!data/evaluation/retrieval_questions.json
+!data/evaluation/benchmark_questions.json
+!data/evaluation/EVALUATION_RUBRIC.md

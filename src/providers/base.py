@@ -13,6 +13,7 @@ class ProviderResponse:
     error: str | None = None
     raw_answer: str | None = None
     raw_citations: list[str] = field(default_factory=list)
+    ttft_ms: float | None = None
 
 
 def validate_answer(answer: dict) -> None:
