@@ -50,21 +50,21 @@ def show_qa():
 
 
 def show_benchmark():
-    st.write("Completed benchmark results using the same RAG pipeline for all three providers.")
+    st.write("Completed benchmark results using the same RAG pipeline across three required free-tier providers and one additional paid OpenAI model.")
     try:
         comparison, breakdown = load_benchmark_tables()
     except ValueError as error:
         st.error(str(error))
         return
     st.dataframe(comparison, hide_index=True, width="stretch")
-    st.caption("Benchmark runs used free-tier API access. Estimated paid cost shows what the same token usage would cost under standard paid API rates.")
+    st.caption("Gemini, Groq, and Mistral used free-tier API access. OpenAI was included as an additional paid comparison. Estimated paid cost uses the standard API rates recorded in the summary.")
     st.caption("Answer accuracy and hallucination were human-reviewed. Timing values are in seconds; costs are in USD. N/A indicates an unavailable measurement.")
     st.subheader("Answer accuracy by question type")
     st.dataframe(breakdown, hide_index=True, width="stretch")
     st.divider()
     st.subheader("Run benchmark")
-    st.write("Optional: running a benchmark makes live API calls and may take time or encounter free-tier rate limits. Saved successful responses are skipped; failed responses are retried.")
-    st.caption("Generated responses require human review before becoming part of the finalized evaluation summary. Running here does not regenerate the saved comparison above.")
+    st.write("Optional: running a benchmark makes live API calls and may take time or encounter rate limits. OpenAI calls are paid. Saved successful responses are skipped; failed responses are retried.")
+    st.caption("Generated responses require human review and summary regeneration before changing the finalized comparison. Running here only produces raw responses and does not regenerate the saved comparison above.")
     with st.form("run_benchmark"):
         provider = st.selectbox("Benchmark provider", list(PROVIDERS), format_func=PROVIDERS.get)
         delay = st.number_input("Delay between requests (seconds)", min_value=0.0, value=0.0, step=1.0)

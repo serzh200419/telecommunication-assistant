@@ -12,7 +12,7 @@ from src.evaluation.benchmark_validation import ROOT, validate_benchmark_questio
 
 DATASET_PATH = ROOT / "data/evaluation/benchmark_questions.json"
 RESULTS_DIR = ROOT / "data/evaluation/results"
-PROVIDERS = ("gemini", "groq", "mistral")
+PROVIDERS = ("gemini", "groq", "mistral", "openai")
 QUESTION_FIELDS = ("language", "type", "question", "expected_answer", "expected_articles")
 
 
@@ -116,7 +116,7 @@ def summarize(records):
 
 def run_benchmark(provider, question_id=None, results_dir=RESULTS_DIR, delay_seconds=0.0):
     if provider not in PROVIDERS:
-        raise ValueError("Choose gemini, groq, or mistral.")
+        raise ValueError("Choose gemini, groq, mistral, or openai.")
     if delay_seconds < 0:
         raise ValueError("delay_seconds must be non-negative.")
     questions = load_questions()

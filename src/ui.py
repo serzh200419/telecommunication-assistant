@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 SUMMARY_PATH = Path(__file__).resolve().parents[1] / "data/evaluation/final_benchmark_summary.json"
-PROVIDERS = {"gemini": "Gemini", "groq": "Groq", "mistral": "Mistral"}
+PROVIDERS = {"gemini": "Gemini", "groq": "Groq", "mistral": "Mistral", "openai": "OpenAI (paid)"}
 GROUPS = {
     "armenian_answerable": "Armenian answerable", "english_answerable": "English answerable",
     "synthesis": "Synthesis", "unanswerable": "Unanswerable",
@@ -48,10 +48,12 @@ def format_metric(value, kind):
 def load_benchmark_tables(path=SUMMARY_PATH):
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        if set(data["providers"]) != set(PROVIDERS):
-            raise ValueError("Expected Gemini, Groq, and Mistral results.")
+        available = set(data["providers"])
+        if available != set(PROVIDERS):
+            raise ValueError("Expected exactly four providers: Gemini, Groq, Mistral, and OpenAI.")
+        displayed = {provider: label.removesuffix(" (paid)") for provider, label in PROVIDERS.items()}
         comparison = []
-        for provider, label in PROVIDERS.items():
+        for provider, label in displayed.items():
             record = data["providers"][provider]
             if record["provider"] != provider or not isinstance(record["model"], str) or not record["model"].strip():
                 raise ValueError("Invalid provider or model.")
@@ -62,7 +64,7 @@ def load_benchmark_tables(path=SUMMARY_PATH):
         breakdown = [
             {"Question type": label, **{
                 name: format_metric(data["by_question_type"][group][provider]["normalized_answer_accuracy"], "percent")
-                for provider, name in PROVIDERS.items()
+                for provider, name in displayed.items()
             }}
             for group, label in GROUPS.items()
         ]

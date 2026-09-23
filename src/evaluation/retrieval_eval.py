@@ -4,6 +4,7 @@ from pathlib import Path
 from statistics import mean
 
 from src.retrieval import retrieve
+from src.query_preprocessing import retrieval_query
 
 
 OUTPUT_PATH = Path(__file__).resolve().parents[2] / "data/evaluation/retrieval_results.json"
@@ -41,7 +42,7 @@ def validate_questions(questions: list[dict]) -> None:
 
 
 def evaluate_question(question: dict) -> dict:
-    retrieved = retrieve(question["question"], top_k=3)
+    retrieved = retrieve(retrieval_query(question["question"]), top_k=3)
     articles = list(dict.fromkeys(result["article_number"] for result in retrieved))
     result = {
         **question,
@@ -106,7 +107,7 @@ def print_summary(summary: dict) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate retrieval using unique article ranks from five chunks.")
+    parser = argparse.ArgumentParser(description="Evaluate retrieval using production preprocessing and three chunks.")
     parser.add_argument("questions_path", type=Path)
     args = parser.parse_args()
     questions = json.loads(args.questions_path.read_text(encoding="utf-8"))

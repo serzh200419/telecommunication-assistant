@@ -7,7 +7,27 @@ from unittest.mock import patch
 
 from streamlit.testing.v1 import AppTest
 
-from src.ui import SUMMARY_PATH, format_metric, load_benchmark_tables
+from src.ui import METRICS, PROVIDERS, GROUPS, format_metric, load_benchmark_tables
+
+
+def setUpModule():
+    global SUMMARY_PATH, summary_directory, loader_patch
+    summary_directory = tempfile.TemporaryDirectory()
+    SUMMARY_PATH = Path(summary_directory.name) / "summary.json"
+    data = {
+        "providers": {provider: {"provider": provider, "model": "test-model",
+                      **{field: 0 for field, _, _ in METRICS}} for provider in PROVIDERS},
+        "by_question_type": {group: {provider: {"normalized_answer_accuracy": 1}
+                             for provider in PROVIDERS} for group in GROUPS},
+    }
+    SUMMARY_PATH.write_text(json.dumps(data), encoding="utf-8")
+    loader_patch = patch("src.ui.load_benchmark_tables", side_effect=lambda: load_benchmark_tables(SUMMARY_PATH))
+    loader_patch.start()
+
+
+def tearDownModule():
+    loader_patch.stop()
+    summary_directory.cleanup()
 
 
 class BenchmarkDisplayTests(unittest.TestCase):
@@ -20,9 +40,9 @@ class BenchmarkDisplayTests(unittest.TestCase):
             self.assertEqual(format_metric(value, kind), expected)
 
     def test_summary_tables_use_saved_values(self):
-        comparison, breakdown = load_benchmark_tables()
+        comparison, breakdown = load_benchmark_tables(SUMMARY_PATH)
         data = json.loads(SUMMARY_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(len(comparison), 3)
+        self.assertEqual(len(comparison), 4)
         self.assertEqual(len(comparison[0]), 16)
         self.assertEqual(len(breakdown), 4)
         self.assertEqual(comparison[0]["Answer accuracy"],
@@ -38,6 +58,25 @@ class BenchmarkDisplayTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "malformed"):
                     load_benchmark_tables(path)
 
+    def test_openai_summary_and_missing_provider_detection(self):
+        data = json.loads(SUMMARY_PATH.read_text(encoding="utf-8"))
+        data["providers"]["openai"] = {**data["providers"]["gemini"], "provider": "openai", "model": "test-model"}
+        for group in data["by_question_type"].values():
+            group["openai"] = dict(group["gemini"])
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "summary.json"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            comparison, breakdown = load_benchmark_tables(path)
+        self.assertEqual(len(comparison), 4)
+        self.assertEqual(comparison[-1]["Provider"], "OpenAI")
+        self.assertEqual(set(breakdown[0]), {"Question type", "Gemini", "Groq", "Mistral", "OpenAI"})
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "summary.json"
+            del data["providers"]["openai"]
+            path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "malformed"):
+                load_benchmark_tables(path)
+
 
 class AppTests(unittest.TestCase):
     def setUp(self):
@@ -49,6 +88,13 @@ class AppTests(unittest.TestCase):
             self.assertFalse(app.exception)
             self.assertEqual([tab.label for tab in app.tabs], ["Ask the Law", "Benchmark"])
             self.assertEqual(len(app.dataframe), 2)
+            captions = " ".join(item.value for item in app.caption)
+            self.assertIn("Gemini, Groq, and Mistral used free-tier", captions)
+            self.assertIn("OpenAI was included as an additional paid comparison", captions)
+            self.assertIn("human-reviewed", captions)
+            self.assertIn("summary regeneration", captions)
+            self.assertIn("OpenAI (paid)", app.selectbox[0].options)
+            self.assertIn("OpenAI (paid)", app.selectbox[1].options)
             app.button[0].click().run()
             self.assertTrue(app.warning)
             ask.assert_not_called()

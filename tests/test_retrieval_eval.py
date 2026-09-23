@@ -25,6 +25,16 @@ def retrieval_results(articles):
 
 
 class RetrievalEvaluationTests(unittest.TestCase):
+    @patch("src.evaluation.retrieval_eval.retrieve", return_value=[])
+    def test_shared_production_preprocessing(self, retrieve):
+        from src.query_preprocessing import retrieval_query
+
+        record = {**question(), "question": "Who is operator?"}
+        with patch("src.evaluation.retrieval_eval.retrieval_query", wraps=retrieval_query) as preprocess:
+            evaluate_questions([record])
+        preprocess.assert_called_once_with(record["question"])
+        retrieve.assert_called_once_with("Who is operator in electronic communications?", top_k=3)
+
     @patch("src.evaluation.retrieval_eval.retrieve")
     def test_unique_article_ranking_and_reciprocal_rank(self, retrieve):
         retrieve.return_value = retrieval_results(["45", "45", "43", "2", "7"])

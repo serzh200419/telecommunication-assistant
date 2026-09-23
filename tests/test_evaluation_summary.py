@@ -13,6 +13,11 @@ from src.evaluation import evaluation_summary as summary
 
 class EvaluationSummaryTests(unittest.TestCase):
     def setUp(self):
+        pricing = copy.deepcopy(summary.PRICING)
+        pricing["providers"]["openai"].update(input_price_per_million_usd=1.0, output_price_per_million_usd=2.0)
+        self.pricing_patch = patch.object(summary, "PRICING", pricing)
+        self.pricing_patch.start()
+        self.addCleanup(self.pricing_patch.stop)
         self.questions = json.loads(
             (summary.EVALUATION_DIR / "benchmark_questions.json").read_text(encoding="utf-8")
         )
@@ -63,6 +68,25 @@ class EvaluationSummaryTests(unittest.TestCase):
         for group, count in zip(summary.GROUPS, (6, 6, 3, 3)):
             self.assertEqual(groups[group]["gemini"]["questions"], count)
         self.assertEqual(groups["armenian_answerable"]["gemini"]["normalized_answer_accuracy"], 1)
+
+    def test_four_providers_and_paid_cost(self):
+        result = self.aggregate()
+        self.assertEqual(len(self.reviews), 72)
+        self.assertEqual(set(result["providers"]), {"gemini", "groq", "mistral", "openai"})
+        for provider, row in result["providers"].items():
+            self.assertEqual(row["actual_benchmark_cost_usd"],
+                             row["estimated_paid_cost_usd"] if provider == "openai" else 0.0)
+        self.assertAlmostEqual(result["providers"]["openai"]["actual_benchmark_cost_usd"], 0.00252)
+
+    def test_missing_openai_pricing(self):
+        summary.PRICING["providers"]["openai"]["input_price_per_million_usd"] = None
+        with self.assertRaisesRegex(ValueError, "Missing .* pricing metadata for openai"):
+            self.aggregate()
+
+    def test_missing_openai_pricing_section(self):
+        del summary.PRICING["providers"]["openai"]
+        with self.assertRaisesRegex(ValueError, "Missing pricing metadata for openai"):
+            self.aggregate()
 
     def test_missing_review(self):
         self.reviews.pop()
@@ -172,7 +196,7 @@ class EvaluationSummaryTests(unittest.TestCase):
             self.assertEqual(set(result["providers"]), set(summary.PROVIDERS))
             with (root / "final_benchmark_summary.csv").open(encoding="utf-8", newline="") as file:
                 rows = list(csv.DictReader(file))
-            self.assertEqual(len(rows), 3)
+            self.assertEqual(len(rows), 4)
             self.assertEqual(list(rows[0]), list(summary.CSV_FIELDS))
             self.assertEqual(before, {path: path.read_bytes() for path in inputs})
 

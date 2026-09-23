@@ -4,16 +4,16 @@ import math
 from statistics import mean, median, quantiles
 
 from src.evaluation.benchmark_validation import ROOT, validate_benchmark_questions
+from src.evaluation.benchmark import PROVIDERS
 
 
 EVALUATION_DIR = ROOT / "data/evaluation"
-PROVIDERS = ("gemini", "groq", "mistral")
 GROUPS = ("armenian_answerable", "english_answerable", "synthesis", "unanswerable")
 PRICING = {
     "pricing_date": "2026-09-23",
     "currency": "USD",
-    "actual_benchmark_tier": "free tier",
-    "actual_cost_basis": "benchmark API usage incurred no charge",
+    "actual_benchmark_tier": "free tier for Gemini, Groq, and Mistral; paid for OpenAI",
+    "actual_cost_basis": "Gemini, Groq, and Mistral incurred no charge; OpenAI uses token-based paid pricing.",
     "estimated_cost_basis": "standard paid API rates",
     "providers": {
         "gemini": {
@@ -30,6 +30,13 @@ PRICING = {
             "model": "voxtral-small-2507",
             "input_price_per_million_usd": 0.10,
             "output_price_per_million_usd": 0.40,
+        },
+        "openai": {
+            "model": "gpt-5.6-sol",
+            "actual_benchmark_tier": "paid",
+            "pricing_date": "2026-09-24",
+            "input_price_per_million_usd": 4.00,
+            "output_price_per_million_usd": 20.00,
         },
     },
 }
@@ -63,7 +70,7 @@ def validate_number(value, field, pair, nullable=False, integer=False, maximum=N
 
 def validate_inputs(benchmarks, reviews, questions):
     if not isinstance(benchmarks, dict) or set(benchmarks) != set(PROVIDERS):
-        raise ValueError("Expected exactly three providers: gemini, groq, mistral.")
+        raise ValueError("Expected exactly four providers: gemini, groq, mistral, openai.")
     originals = {question["id"]: question for question in questions}
     if len(questions) != 18 or len(originals) != 18:
         raise ValueError("Expected 18 unique benchmark questions.")
@@ -134,8 +141,8 @@ def validate_inputs(benchmarks, reviews, questions):
     missing = pairs - indexed_reviews.keys()
     if missing:
         raise ValueError(f"Missing manual review for: {sorted(missing)}.")
-    if len(reviews) != 54:
-        raise ValueError("Expected exactly 54 manual review records.")
+    if len(reviews) != 72:
+        raise ValueError("Expected exactly 72 manual review records.")
     return indexed_reviews
 
 
@@ -191,14 +198,20 @@ def summarize_provider(provider, records, reviews):
     totals = [summary["total_prompt_tokens"], summary["total_completion_tokens"]]
     summary["total_tokens"] = sum(totals) if all(value is not None for value in totals) else None
     summary["measurement_counts"] = coverage
-    prices = PRICING["providers"][provider]
+    prices = PRICING["providers"].get(provider)
+    if not isinstance(prices, dict):
+        raise ValueError(f"Missing pricing metadata for {provider}.")
+    for field in ("input_price_per_million_usd", "output_price_per_million_usd"):
+        if prices.get(field) is None:
+            raise ValueError(f"Missing {field} pricing metadata for {provider}.")
+        validate_number(prices[field], field, provider)
     input_tokens = summary["total_prompt_tokens"]
     output_tokens = summary["total_completion_tokens"]
     input_cost = input_tokens / 1_000_000 * prices["input_price_per_million_usd"] if input_tokens is not None else None
     output_cost = output_tokens / 1_000_000 * prices["output_price_per_million_usd"] if output_tokens is not None else None
     paid_cost = input_cost + output_cost if input_cost is not None and output_cost is not None else None
     summary.update({
-        "actual_benchmark_cost_usd": 0.0,
+        "actual_benchmark_cost_usd": paid_cost if provider == "openai" else 0.0,
         "input_price_per_million_usd": prices["input_price_per_million_usd"],
         "output_price_per_million_usd": prices["output_price_per_million_usd"],
         "estimated_input_cost_usd": input_cost,

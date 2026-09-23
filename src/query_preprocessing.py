@@ -1,9 +1,11 @@
+import re
 import unicodedata
 
 
-PREFIXES = {
-    "en": "Law of the Republic of Armenia on Electronic Communications. ",
-    "hy": "Հայաստանի Հանրապետության էլեկտրոնային հաղորդակցության մասին օրենք։ ",
+AMBIGUOUS_TERMS = {
+    "en": {"operator", "interconnection", "subscriber", "service provider"},
+    "hy": {"օպերատոր", "օպերատորը", "փոխկապակցում", "փոխկապակցումը",
+           "բաժանորդ", "բաժանորդը", "ծառայություններ մատուցող", "ծառայություններ մատուցողը"},
 }
 META_PHRASES = {
     "en": {
@@ -40,4 +42,23 @@ def meta_answer(question):
 
 
 def retrieval_query(question):
-    return PREFIXES[question_language(question)] + question
+    query = " ".join(question.split())
+    language = question_language(query)
+    normalized = query.casefold().translate(str.maketrans("", "", "՚՛՜՞"))
+    normalized = " ".join("".join(
+        " " if unicodedata.category(char).startswith("P") else char for char in normalized
+    ).split())
+    if len(normalized.split()) > 6:
+        return query
+    if language == "en":
+        match = re.fullmatch(r"(?:(?:who|what) is|define) (?:a |an |the )?(.+)", normalized)
+        if match is None:
+            match = re.fullmatch(r"what does (?:a |an |the )?(.+) mean", normalized)
+    else:
+        match = re.fullmatch(r"(?:ով է|ինչ է նշանակում|ինչ է) (.+)", normalized)
+    if match is None or match.group(1) not in AMBIGUOUS_TERMS[language]:
+        return query
+    while query and unicodedata.category(query[-1]).startswith("P"):
+        query = query[:-1].rstrip()
+    suffix = " in electronic communications?" if language == "en" else " էլեկտրոնային հաղորդակցության ոլորտում։"
+    return query + suffix
