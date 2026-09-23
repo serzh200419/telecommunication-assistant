@@ -5,6 +5,7 @@ from contextlib import redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from src.query_preprocessing import retrieval_query
 from src.providers.base import ProviderResponse
 from src.providers.gemini import GeminiProvider, answer_schema
 from src.rag import SYSTEM_INSTRUCTION, ask, assemble_context, main
@@ -34,7 +35,7 @@ class RagTests(unittest.TestCase):
         for question in [" Ո՞ր դեպքերում կարող է ծառայությունը կասեցվել: ", " What rights do end users have? "]:
             with self.subTest(question=question):
                 result = ask(question, self.provider)
-                retrieve.assert_called_with(question, top_k=3)
+                retrieve.assert_called_with(retrieval_query(question), top_k=3)
                 self.provider.generate.assert_called_with(question, assemble_context(self.results), SYSTEM_INSTRUCTION, ["45"])
                 self.assertEqual(result["answer"], "Supported answer")
                 self.assertEqual(result["question"], question)

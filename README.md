@@ -1,5 +1,19 @@
 # telecommunication-assistant
 
+Start the web application from the repository root:
+
+```sh
+python -m streamlit run app.py
+```
+
+Ask the Law accepts Armenian or English questions and uses the selected provider
+through the existing RAG pipeline. Configure its API key and model in `.env` or
+environment variables as shown in `.env.example`. Local processed law and index
+files must already exist. Retrieved context is available in a collapsed expander.
+The Benchmark tab reads `data/evaluation/final_benchmark_summary.json` and makes
+no provider calls. Generate that file with
+`python -m src.evaluation.evaluation_summary` if it is missing.
+
 Run one benchmark question or the full fixed dataset for an explicit provider:
 
 ```sh

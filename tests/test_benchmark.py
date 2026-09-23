@@ -234,7 +234,11 @@ class BenchmarkTests(unittest.TestCase):
             with patch("sys.argv", ["benchmark", "--provider", provider, "--question-id", "hy_003"]), \
                     patch.object(benchmark, "run_benchmark", return_value={"failed": 0}) as run:
                 benchmark.main()
-                run.assert_called_once_with(provider, "hy_003")
+                run.assert_called_once_with(provider=provider, question_id="hy_003", delay_seconds=0.0)
+        with patch("sys.argv", ["benchmark", "--provider", "groq", "--delay-seconds", "2.5"]), \
+                patch.object(benchmark, "run_benchmark", return_value={"failed": 0}) as run:
+            benchmark.main()
+            run.assert_called_once_with(provider="groq", question_id=None, delay_seconds=2.5)
 
 
 if __name__ == "__main__":

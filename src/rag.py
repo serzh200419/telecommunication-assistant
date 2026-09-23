@@ -1,7 +1,8 @@
 import argparse
 from dataclasses import asdict, replace
 
-from src.providers.base import validate_answer
+from src.providers.base import ProviderResponse, validate_answer
+from src.query_preprocessing import meta_answer, retrieval_query
 from src.retrieval import retrieve
 
 
@@ -16,8 +17,10 @@ allowed_citations. Do not cite other articles merely mentioned inside a retrieve
 Do not invent citations.
 Distinguish what the law directly states from matters requiring outside information.
 If the supplied context does not contain enough information to answer the question,
-clearly state in the question's language that the provided Electronic Communications
-Law does not contain enough information to answer it. In that case return citations: [].
+clearly state in the question's language that the provided Law of the Republic of Armenia
+on Electronic Communications does not contain enough information to answer it.
+For Armenian questions, refer to it as «Հայաստանի Հանրապետության էլեկտրոնային հաղորդակցության մասին օրենքը».
+In that case return citations: [].
 Return exactly a JSON object with answer (string) and citations (list of article strings).
 """
 
@@ -33,6 +36,13 @@ def assemble_context(results: list[dict]) -> str:
 def ask(question: str, provider=None) -> dict:
     if not isinstance(question, str) or not question.strip():
         raise ValueError("Question must be a nonempty string.")
+    description = meta_answer(question)
+    if description is not None:
+        return {
+            "question": question,
+            **asdict(ProviderResponse(provider="local", model="meta", answer=description)),
+            "retrieved_articles": [], "retrieved_results": [],
+        }
     if provider is None or provider == "gemini":
         from src.providers.gemini import GeminiProvider
 
@@ -47,7 +57,7 @@ def ask(question: str, provider=None) -> dict:
         provider = MistralProvider()
     elif isinstance(provider, str):
         raise ValueError("Unknown provider. Choose gemini, groq, or mistral.")
-    results = sorted(retrieve(question, top_k=3), key=lambda result: result["rank"])
+    results = sorted(retrieve(retrieval_query(question), top_k=3), key=lambda result: result["rank"])
     allowed = list(dict.fromkeys(result["article_number"] for result in results))
     response = provider.generate(question, assemble_context(results), SYSTEM_INSTRUCTION, allowed)
     if response.error is None:

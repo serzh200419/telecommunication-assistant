@@ -6,6 +6,7 @@ from unittest.mock import patch
 import httpx
 from groq import RateLimitError
 
+from src.query_preprocessing import retrieval_query
 from src.providers.base import ProviderResponse
 from src.providers.groq import GroqProvider
 from src.rag import SYSTEM_INSTRUCTION, ask, assemble_context
@@ -131,7 +132,7 @@ class ProviderSelectionTests(unittest.TestCase):
                 result = ask("Question", provider=name)
                 self.assertEqual(result["provider"], name)
                 factory.return_value.generate.assert_called_once_with("Question", assemble_context(results), SYSTEM_INSTRUCTION, ["2"])
-                retrieve.assert_called_with("Question", top_k=3)
+                retrieve.assert_called_with(retrieval_query("Question"), top_k=3)
 
     @patch("src.rag.retrieve")
     def test_unknown_provider_is_rejected_before_retrieval(self, retrieve):
