@@ -92,50 +92,43 @@ class AppTests(unittest.TestCase):
             self.assertIn("Gemini, Groq, and Mistral used free-tier", captions)
             self.assertIn("OpenAI was included as an additional paid comparison", captions)
             self.assertIn("human-reviewed", captions)
-            self.assertIn("summary regeneration", captions)
             self.assertIn("OpenAI (paid)", app.selectbox[0].options)
-            self.assertIn("OpenAI (paid)", app.selectbox[1].options)
             app.button[0].click().run()
             self.assertTrue(app.warning)
             ask.assert_not_called()
             app.run()
             run.assert_not_called()
 
-    def test_benchmark_runs_only_on_explicit_submit(self):
+    def test_benchmark_is_read_only(self):
         original_summary = SUMMARY_PATH.read_bytes()
-        with patch("src.evaluation.benchmark.run_benchmark", return_value={
-            "attempted": 18, "successful": 18, "failed": 0,
-        }) as run, patch("src.rag.ask") as ask:
+        with patch("src.evaluation.benchmark.run_benchmark") as run, patch("src.rag.ask") as ask:
             app = AppTest.from_file(str(self.app_path)).run()
-            app.selectbox[1].select("mistral")
-            app.number_input[0].set_value(2.5)
+            self.assertFalse(app.exception)
+            self.assertEqual(app.dataframe[0].value["Provider"].tolist(),
+                             ["Gemini", "Groq", "Mistral", "OpenAI"])
+            self.assertEqual(app.dataframe[1].value.columns.tolist(),
+                             ["Question type", "Gemini", "Groq", "Mistral", "OpenAI"])
+            self.assertEqual([item.label for item in app.selectbox], ["Provider"])
+            self.assertEqual([item.label for item in app.button], ["Ask"])
+            self.assertFalse(app.number_input)
+            self.assertNotIn("Run benchmark", [item.value for item in app.subheader])
+            self.assertTrue(any("saved benchmark summary" in item.value for item in app.markdown))
             app.run()
             run.assert_not_called()
-            app.button[1].click().run()
-            run.assert_called_once_with(provider="mistral", delay_seconds=2.5)
-            self.assertFalse(app.exception)
-            self.assertTrue(any("require human review" in message.value for message in app.success))
-            self.assertEqual(len(app.dataframe), 2)
-            app.run()
-            run.assert_called_once()
             ask.assert_not_called()
         self.assertEqual(SUMMARY_PATH.read_bytes(), original_summary)
 
-    def test_benchmark_failure_noop_and_unexpected_error(self):
-        with patch("src.evaluation.benchmark.run_benchmark") as run:
-            app = AppTest.from_file(str(self.app_path)).run()
-            run.return_value = {"attempted": 1, "successful": 0, "failed": 1}
-            app.button[1].click().run()
-            self.assertTrue(any("1 failed calls" in message.value for message in app.error))
-            run.return_value = {"attempted": 0, "successful": 0, "failed": 0}
-            app.button[1].click().run()
-            self.assertTrue(any("no API calls" in message.value for message in app.success))
-            run.side_effect = RuntimeError("private credential")
-            app.button[1].click().run()
-            self.assertFalse(app.exception)
-            self.assertTrue(any("stopped unexpectedly" in message.value for message in app.error))
-            self.assertFalse(any("private credential" in message.value for message in app.error))
-            self.assertEqual(len(app.dataframe), 2)
+    def test_app_does_not_import_benchmark_runner(self):
+        import ast
+
+        tree = ast.parse(self.app_path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                self.assertNotEqual(node.module, "src.evaluation.benchmark")
+                if node.module == "src.evaluation":
+                    self.assertNotIn("benchmark", [alias.name for alias in node.names])
+            elif isinstance(node, ast.Import):
+                self.assertNotIn("src.evaluation.benchmark", [alias.name for alias in node.names])
 
     def test_question_and_provider_pass_through_and_answer_persists(self):
         result = {"provider": "groq", "model": "test-model", "answer": "Պատասխան",

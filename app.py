@@ -5,7 +5,6 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from src import rag
-from src.evaluation import benchmark
 from src.query_preprocessing import meta_answer
 from src.ui import PROVIDERS, load_benchmark_tables
 
@@ -50,7 +49,7 @@ def show_qa():
 
 
 def show_benchmark():
-    st.write("Completed benchmark results using the same RAG pipeline across three required free-tier providers and one additional paid OpenAI model.")
+    st.write("Finalized results from the saved benchmark summary, using the same RAG pipeline across three required free-tier providers and one additional paid OpenAI model.")
     try:
         comparison, breakdown = load_benchmark_tables()
     except ValueError as error:
@@ -61,27 +60,6 @@ def show_benchmark():
     st.caption("Answer accuracy and hallucination were human-reviewed. Timing values are in seconds; costs are in USD. N/A indicates an unavailable measurement.")
     st.subheader("Answer accuracy by question type")
     st.dataframe(breakdown, hide_index=True, width="stretch")
-    st.divider()
-    st.subheader("Run benchmark")
-    st.write("Optional: running a benchmark makes live API calls and may take time or encounter rate limits. OpenAI calls are paid. Saved successful responses are skipped; failed responses are retried.")
-    st.caption("Generated responses require human review and summary regeneration before changing the finalized comparison. Running here only produces raw responses and does not regenerate the saved comparison above.")
-    with st.form("run_benchmark"):
-        provider = st.selectbox("Benchmark provider", list(PROVIDERS), format_func=PROVIDERS.get)
-        delay = st.number_input("Delay between requests (seconds)", min_value=0.0, value=0.0, step=1.0)
-        submitted = st.form_submit_button("Run benchmark")
-    if submitted:
-        with st.spinner(f"Running {PROVIDERS[provider]} benchmark..."):
-            try:
-                result = benchmark.run_benchmark(provider=provider, delay_seconds=delay)
-            except Exception:
-                st.error("Benchmark stopped unexpectedly. Previously saved results are retained. Check the benchmark files and provider configuration before retrying.")
-            else:
-                if result["failed"]:
-                    st.error(f"{PROVIDERS[provider]} benchmark recorded {result['failed']} failed calls out of {result['attempted']} attempts. Results were saved. Check provider configuration or rate limits before retrying.")
-                elif result["attempted"] == 0:
-                    st.success(f"{PROVIDERS[provider]} benchmark is already complete. Saved successes were reused; no API calls were needed.")
-                else:
-                    st.success(f"{PROVIDERS[provider]} benchmark finished: {result['successful']} successful calls. Responses were saved and require human review before finalization.")
 
 
 def main():
