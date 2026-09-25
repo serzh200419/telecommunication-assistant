@@ -72,7 +72,7 @@ The retrieval query receives electronic-communications context only when it matc
 
 It appends domain context to those queries; it does not prefix every question. Detailed questions and nonmatching terms receive only whitespace normalization. The augmented query is used exclusively for retrieval, while the original question remains in the generation request and returned record.
 
-The development rationale was to address ambiguous short terms without disturbing already specific questions. An earlier unconditional-prefix approach reportedly regressed detailed benchmark retrieval, motivating the conservative rule. The current saved retrieval results verify restored benchmark coverage; they do not retain a quantitative before/after comparison for short queries. This is a narrow deterministic heuristic, not a general intent classifier. `src/evaluation/retrieval_eval.py` uses the same `retrieval_query` function as runtime RAG.
+The development rationale was to address ambiguous short terms without disturbing already specific questions. During development, an earlier unconditional-prefix approach regressed detailed benchmark retrieval, motivating the conservative rule. The current saved retrieval results verify restored benchmark coverage; they do not retain a quantitative before/after comparison for short queries. This is a narrow deterministic heuristic, not a general intent classifier. `src/evaluation/retrieval_eval.py` uses the same `retrieval_query` function as runtime RAG.
 
 ## 7. Retrieval
 
@@ -148,7 +148,7 @@ The comparison holds the question set, preprocessing, embedding model, document 
 
 This controls major sources of variation, but it is not a perfectly identical API experiment: schema support, decoding controls, reasoning settings, and provider infrastructure differ. Accuracy and hallucination are manually reviewed; no LLM judge defines the official results. Aggregation validates source records and joins reviews by provider and question ID.
 
-The Benchmark tab reads the finalized summary without provider calls. Its separate optional run form executes one explicitly selected provider, preserving resume behavior. Raw responses require human review and summary regeneration before affecting the saved comparison. This keeps exploratory runs separate from finalized human judgments.
+The Benchmark tab reads and displays the finalized benchmark summary without making provider calls. Benchmark execution remains an offline CLI workflow, and new raw responses require human review and summary regeneration before becoming part of the finalized comparison.
 
 ## 14. Key design decisions
 
@@ -175,7 +175,7 @@ There is no hybrid lexical search, reranker, automatic provider fallback, semant
 
 A larger held-out benchmark should precede additional complexity, especially for cross-language legal terminology, multi-article synthesis, and adversarial questions. Adding laws and regulatory documents would require source/version metadata and a deliberate update and reindexing process.
 
-Hybrid BM25 and dense retrieval, reranking, and stronger claim-to-passage checks could address demonstrated retrieval or grounding errors. Translation or dual-language representations would be justified if English retrieval becomes a measured bottleneck. A production vector database, access controls, and operational monitoring become appropriate as deployment requirements grow. Provider routing and fallback could improve availability, but should preserve transparent reporting of which model answered. None of these features is currently implemented.
+Hybrid BM25 and dense retrieval, reranking, and stronger claim-to-passage checks could be evaluated as the corpus grows or if future testing reveals retrieval or grounding weaknesses. Translation or dual-language representations would be justified if English retrieval becomes a measured bottleneck. A production vector database, access controls, and operational monitoring become appropriate as deployment requirements grow. Provider routing and fallback could improve availability, but should preserve transparent reporting of which model answered. None of these features is currently implemented.
 
 ## 17. Code map
 
@@ -193,5 +193,5 @@ Hybrid BM25 and dense retrieval, reranking, and stronger claim-to-passage checks
 | Retrieval evaluation | `src/evaluation/retrieval_eval.py` | Article coverage and reciprocal-rank measurements. |
 | Dataset validation | `src/evaluation/benchmark_validation.py` | Validate question schema and source article existence. |
 | Final aggregation | `src/evaluation/evaluation_summary.py` | Join human reviews with final results and calculate summaries. |
-| Streamlit application | `app.py` | Question form, answer/context display, comparison, and explicit benchmark control. |
+| Streamlit application | `app.py` | Question form, answer/context display, and finalized benchmark comparison. |
 | Benchmark presentation | `src/ui.py` | Validate saved summary and format comparison/type tables. |
